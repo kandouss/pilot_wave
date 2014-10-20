@@ -1,0 +1,39 @@
+#!/bin/bash
+export SHELL=$(type -p bash)
+
+NPTS=500
+
+echo -e "INPUT-CLASS TEXTFP \nINPUT-SIZE 32\nRANK 2\nDIMENSION-SIZES $NPTS $NPTS" > h5.cfg
+#rm -f output/*.h5 output/*.png
+
+readarray paths < output/particle_paths.txt
+
+png () {
+
+	h5import $1 -c h5.cfg -o $1".h5"
+	h5topng $1".h5" -c bluered -Z -o $1".png"
+	
+	[[ "$1" =~ [0-9]+ ]] && k=${BASH_REMATCH[0]} && k=`echo $k|sed 's/^0*//'`
+	readarray paths < output/particle_paths.txt
+	l=${paths[$(( $k ))]}
+
+	a=(${l//,/ })
+
+	npts=$(( ${#a[@]} / 2))
+	for ((i=0 ; i < $npts ; i++)); do
+	        px=${a[$(( 2*i ))]}
+	        py=${a[$(( 2*i + 1 ))]}
+	        convert $1".png" -fill black -draw "circle $(( $px + 1 )),$(( 500 - $py + 1 )) $(( $px - 1 )),$(( 500 - $py - 1 ))" $1".png"
+	done
+
+	rm $1".h5"
+}
+
+export -f png
+
+
+
+ls output/mat_????? | parallel -j2 "png {}"
+
+avconv -r 30 -i output/mat_%05d.png -b:v 1000k "videos/v"$(date +%m%d%H%M%S).mp4
+rm h5.cfg output/*.png
