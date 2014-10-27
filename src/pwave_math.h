@@ -17,15 +17,30 @@ typedef struct Index
 
 typedef struct Field
 {
-	double length_scale;
+	//Non-dimensional field parameter
+	double S;
+	//Size of the 2D field array
 	size_t x_max;
 	size_t y_max;
+	//Pointer to field array
 	double *field_array;
 } Field;
 
-void initialize_field(Field *f_in, size_t field_x, size_t field_y);
+typedef struct Droplet
+{
+	//Droplet parameter
+	double Q;
+	//Position of the droplet
+	Point p;
+	//Previous position of the droplet
+	Point p_prev;
+} Droplet;
+
+void initialize_field(Field *f_in, size_t field_x, size_t field_y, double S_in);
 
 void destroy_field(Field *f_in);
+
+void initialize_droplet(Droplet *drop, Point *start_point, double Q_in);
 
 double gfv(Field *f_in, Index in);
 

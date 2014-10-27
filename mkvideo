@@ -1,7 +1,7 @@
 #!/bin/bash
 export SHELL=$(type -p bash)
 
-NPTS=500
+NPTS=200
 
 echo -e "INPUT-CLASS TEXTFP \nINPUT-SIZE 32\nRANK 2\nDIMENSION-SIZES $NPTS $NPTS" > h5.cfg
 #rm -f output/*.h5 output/*.png
@@ -23,7 +23,7 @@ png () {
 	for ((i=0 ; i < $npts ; i++)); do
 	        px=${a[$(( 2*i ))]}
 	        py=${a[$(( 2*i + 1 ))]}
-	        convert $1".png" -fill black -draw "circle $(( $px + 1 )),$(( 500 - $py + 1 )) $(( $px - 1 )),$(( 500 - $py - 1 ))" $1".png"
+	        convert $1".png" -fill black -draw "circle $(( $px + 1 )),$(( $NPTS - $py + 1 )) $(( $px - 1 )),$(( $NPTS - $py - 1 ))" $1".png"
 	done
 
 	rm $1".h5"
@@ -36,4 +36,4 @@ export -f png
 ls output/mat_????? | parallel -j2 "png {}"
 
 avconv -r 30 -i output/mat_%05d.png -b:v 1000k "videos/v"$(date +%m%d%H%M%S).mp4
-rm h5.cfg output/*.png
+#rm h5.cfg output/*.png

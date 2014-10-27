@@ -4,123 +4,98 @@
 #include "pwave_math.h"
 #include "pwave_io.h"
 
-typedef struct P
+void update_field(Field *f, Droplet *drops, size_t n_drops)
 {
-	double delta_t;
-	double m;
-	double D;
-	double A;
-	double K_f;
-	double T_f;
-	double M_e;
-
-} P;
-
-void update_field(Field *f_in, Point *pts, size_t n_pts)
-{
-	double scale=f_in->length_scale;
-	// debug value for A Delta / T_f
-	double C = 0.5;
-	// debug value for exp(-Delta Me/T_f)
-	double K = 0.9;
-	// Debug value for K_f
-	double Kf = 0.15;
+	//expM = e^(-1/M)
+	double expM = 0.95;
 	
 	//variables for the loop
+	double p_x,p_y;
 	double delta;
 	double dist;
-	for(int i=0;i<f_in->x_max;i++)
+	for(int i=0;i<f->x_max;i++)
 	{
-		for(int j=0;j<f_in->y_max;j++)
+		for(int j=0;j<f->y_max;j++)
 		{
 			Index ind = {i,j};
 			delta = 0;
-			for(int m=0;m<n_pts;m++)
+			for(int m=0;m<n_drops;m++)
 			{
-				dist = sqrt(pow(pts[m].x-scale*i,2)+pow(pts[m].y-scale*j,2));
-				delta = delta + bess0(Kf * dist);
+				p_x = drops[m].p.x;
+				p_y = drops[m].p.y;
+				dist = sqrt(pow(p_x-i,2)+pow(p_y-j,2));
+				delta = delta + drops[m].Q * bess0(dist);
 			}
-			//sfv(f_in,ind,(old_value + C*(delta0+delta1+delta2))*K);
-			sfv(f_in,ind,(gfv(f_in,ind) + C*delta)*K);
+			sfv(f,ind,gfv(f,ind)*expM + delta);
 		}
 	}
 }
 
-Point update_particle(Field *f_in, Point pt_1, Point pt_2)
+void update_particle(Field *f_in, Droplet *drop)
 {
-	double M=1;
-	double dt=.1;
-	double g=1000;
-	double D=5;
-	Point pg = point_grad(f_in,pt_1);
-//	printf("grad p is (%f,%f)\n",pg.x,pg.y);
-	double c0 = D/dt + M/pow(dt,2);
-	double c1 = 2*M/pow(dt,2);
-	double c2 = D/dt - M/pow(dt,2);
-	double c3 = -1*M*g;
-	return (Point) { (c1*pt_1.x + c2*pt_2.x + c3*pg.x)/c0,
-			 (c1*pt_1.y + c2*pt_2.y + c3*pg.y)/c0	}; 
+	Point pg = point_grad(f_in,drop->p);
+	double Q = drop->Q;
+	Point np = { 2/(Q+1)*drop->p.x + (Q-1)/(Q+1)*drop->p_prev.x - 1/(Q+1)*(pg.x),
+		2/(Q+1)*drop->p.y + (Q-1)/(Q+1)*drop->p_prev.y - 1/(Q+1)*(pg.y) };
+	drop->p_prev.x = drop->p.x;
+	drop->p_prev.y = drop->p.y;
+	drop->p.x = np.x;
+	drop->p.y = np.y;
+	
 }
 
 int main() {
-	int max_iterations=2000;
-	double side_length = 1000;
-	int pps = 500;
+	int max_iterations=5000;
+	double L = 200;
+	double S = 1;
+	double Q = 0.6;
 
 	printf("\nRunning main...\n");
 	Field test_field;
-	initialize_field(&test_field,pps,pps);
-	test_field.length_scale = (double)side_length/pps;
+	initialize_field(&test_field,L,L,S);
 
-	char *ofname = (char *)malloc(32*sizeof(char));
-	char *infofname = (char *)malloc(32*sizeof(char));
+	char *ofname = (char *)malloc(32*sizeof(char));	
+	char *pfname = (char *)malloc(32*sizeof(char));
 	
-	size_t n_pts = 5;
-	Point pts[5] = {
-		{side_length*0.52,side_length*0.52},
-		{side_length*0.51,side_length*0.50},
-		{side_length*0.56,side_length*0.49},
-		{side_length*0.45,side_length*0.55},
-		{side_length*0.47,side_length*0.47} };
+	size_t n_drops = 5;
+	Droplet drops[5];
 
-	Point pts_prev[5],pts_tmp[5];
 
-	// Zero initial momentum for the points.
-	for(int m=0;m<n_pts;m++)
-	{
-		pts_prev[m] = (Point){pts[m].x,pts[m].y};
-		pts_tmp[m] = (Point){pts[m].x,pts[m].y};
-	}
+	initialize_droplet(&drops[0],&(Point){0.51*L,0.51*L},Q);
+	initialize_droplet(&drops[1],&(Point){0.51*L,0.49*L},Q);
+	initialize_droplet(&drops[2],&(Point){0.49*L,0.52*L},Q);
+	initialize_droplet(&drops[3],&(Point){0.49*L,0.495*L},Q);
+	initialize_droplet(&drops[4],&(Point){0.50*L,0.505*L},Q);
 
-	sprintf(infofname,"output/particle_paths.txt");
-	FILE *info_file = fopen(infofname,"w");
+
+	sprintf(pfname,"output/particle_paths.txt");
+	FILE *path_file = fopen(pfname,"w");
 
 	for(int i=0;i<max_iterations;i++)
 	{
-		printf("... %d/%d...\n",i,max_iterations);
+		printf(">%4d/%4d.. ",i,max_iterations);
 		sprintf(ofname,"output/mat_%05d",i);
 		FILE *ofile = fopen(ofname,"w");
+		
 		// Update all the particle positions!
-		for(int m = 0; m<n_pts; m++)
+		for(int m = 0; m<n_drops; m++)
 		{
-			pts_tmp[m] = pts_prev[m];
-			pts_prev[m] = pts[m];
-			
-			pts[m] = update_particle(&test_field,pts_prev[m],pts_tmp[m]);
-			fprintf(info_file,"%d,%d,",(int)(pts[m].x*pps/side_length),(int)(pts[m].y*pps/side_length));
+			update_particle(&test_field,&drops[m]);
+			printf("%4d,%4d ",(int)round(drops[m].p.x),(int)round(drops[m].p.y));
+			fprintf(path_file," %d,%d",(int)round(drops[m].p.x),(int)round(drops[m].p.y));
 		}
-		fprintf(info_file,"\n");
+		printf("\n");
+		fprintf(path_file,"\n");
 	
 		// Update the field based on the new particle positions.
-		update_field(&test_field, &pts[0],n_pts);
+		update_field(&test_field, &drops[0],n_drops);
 
 		print_field(&test_field,ofile);
 		fclose(ofile);
 	}
-
-	fclose(info_file);
+	fclose(path_file);
+	free(pfname);
 	free(ofname);
-	free(infofname);
 	destroy_field(&test_field);
 	return 0;
 }
