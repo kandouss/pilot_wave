@@ -1,0 +1,28 @@
+\documentclass{article}
+\usepackage{amsmath}
+
+
+\newcommand{\x}{\mathbf{x}}
+
+\begin{document}
+
+\title{Pilot wave simulation notes}
+\author{Kamal Ndousse}
+\date{\today}
+
+\maketitle
+
+\section{Discretization of field and particle equations}
+
+According to [Bush's review paper], the field created by a walking droplet is of the form:
+\begin{equation}
+	\label{eq:raw_field}
+	h(\x,t) = A \sum_{n = -\infty}^{\left[ t/T_{F} \right]} J_{0} \left( K_{F} \left| x - x_{p}(n T_{F}) \right| \right) e^{-(t - n T_{F})/(M T_{F})},
+\end{equation}
+and the position of the droplet is determined by
+\begin{equation}
+	\label{eq:raw_droplet}
+	m \ddot{\x_p} + D \dot{\mathbf{x}_{p}} = - m g \nabla h(\x_p,t).
+\end{equation}
+
+\end{document}
