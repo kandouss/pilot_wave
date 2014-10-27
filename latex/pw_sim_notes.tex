@@ -12,17 +12,80 @@
 
 \maketitle
 
-\section{Discretization of field and particle equations}
+\section{Discretization}
 
 According to [Bush's review paper], the field created by a walking droplet is of the form:
 \begin{equation}
 	\label{eq:raw_field}
-	h(\x,t) = A \sum_{n = -\infty}^{\left[ t/T_{F} \right]} J_{0} \left( K_{F} \left| x - x_{p}(n T_{F}) \right| \right) e^{-(t - n T_{F})/(M T_{F})},
+	h(\x,t) = A \sum_{n = -\infty}^{\left[ t/T_{F} \right]} J_{0} \left( K_{F} \left| \x - \x_{p}(n T_{F}) \right| \right) e^{-(t - n T_{F})/(M T_{F})},
 \end{equation}
 and the position of the droplet is determined by
 \begin{equation}
 	\label{eq:raw_droplet}
-	m \ddot{\x_p} + D \dot{\mathbf{x}_{p}} = - m g \nabla h(\x_p,t).
+	m \ddot{\x_p} + D \dot{\x_p} = - m g \nabla h(\x_p,t).
 \end{equation}
+
+\subsection{Field discretization}
+The field at time $t + T_{F}$ is
+\begin{align}
+	h(\x,t+T_F) &= A \sum_{n = -\infty}^{\left[ t/T_{F} \right]+1} J_{0} \left( K_{F} \left| \x - \x_{p}(n T_{F}) \right| \right) e^{-(t +T_F- n T_{F})/(M T_{F})} \notag \\
+	 &= A \sum_{n = -\infty}^{\left[ t/T_{F} \right]} J_{0} \left( K_{F} \left| \x - \x_{p}(n T_{F}) \right| \right) e^{-(t- n T_{F})/(M T_{F})} e^{-1/M} \notag \\
+	 & + A J_{0} \left( K_F \left| \x - \x_p(t + T_F) \right| \right) \notag \\
+	h(\x,t+T_F) &= A J_0 \left( K_F \left| \x - \x_p(t + T_F) \right | \right) + e^{-1/M} h(\x,t) \label{eq:discrete_field}
+\end{align}
+
+\subsection{Discrete particle motion}
+Similarly we can express the position of the particle at time $t + T_{F}$ using the centered second-difference approximation for the second derivative
+\begin{equation}
+	\ddot{\x_p}(t) \approx \frac{\x_p(t + T_F) - 2 \x_p(t) + \x_p(t - T_F)}{T_F^2}
+\end{equation}
+and Sterling's formula for centered differences for the first derivative
+\begin{equation}
+	\dot{\x_p}(t) \approx \frac{\x_p(t + T_F) - \x_p(t - T_F)}{2 T_F}.
+\end{equation}
+Plugging these into Eq.~\ref{eq:raw_droplet} gives:
+\begin{equation}
+	\label{eq:dd_crappy}
+	-g \nabla h(\x_p(t),t) = \frac{\x_p(t + T_F) - 2 \x_p(t) + \x_p(t - T_F)}{T_F^2}
+	 + \frac{D}{m} \frac{\x_p(t + T_F) - \x_p(t - T_F)}{2 T_F}.
+\end{equation}
+Solving for $\x_p(t + T_F)$, we find:
+\begin{equation}
+	\label{eq:dd_crappy_2}
+	\x_p(t + T_F) = \left( \frac{4 m}{2 m + D T_F} \right) \x_p(t) + \left( \frac{D T_F - 2m}{D T_F + 2m} \right) \x_p(t - T_F) - \left( \frac{2 T_F^2 g}{D T_f + 2m} \right) \nabla h(\x_p(t),t).
+\end{equation}
+
+\subsection{Nondimensionalization}
+The expressions giving the discrete time evolution of the field (Eq.~\ref{eq:discrete_field}) and droplet (Eq.~\ref{eq:dd_crappy_2}) can be simplified by introducing the following non-dimensional variables:
+\begin{align}
+	Q &\equiv \frac{D T_F}{2 M}\text{, and }\\
+	S &\equiv T_F^2 g A K_{F}.
+\end{align}
+$Q$ encapsulates properties which could vary between droplets on a single field (in particular, mass and drag), and $S$ accounts for general properties of the wave field (amplitide of bounces, gravitational force, faraday wave number).
+
+In terms of these parameters, Eqs.~\ref{eq:discrete_field} and~\ref{eq:dd_crappy_2} become:
+\begin{align}
+	h(\x,t+T_F) &= S J_0 \left( K_F \left| \x - \x_p(t + T_F) \right | \right) + e^{-1/M} h(\x,t) \label{eq:nondim_field} \\
+	\x_p(t + T_F) &= \left( \frac{2}{Q+1} \right) \x_p(t) + \left( \frac{Q-1}{Q+1} \right) \x_p(t - T_F) - \left( \frac{1}{K_F(Q+1)} \right) \nabla h(\x_p(t),t) \label{eq:nondim_field}
+\end{align}
+
+Finally, we switch to more suggestive notation for discrete numerical computation by defining:
+\begin{align}
+	\x_p[n] &= \x_p(n T_F) \text{, and }\\
+	h_n[\x] &= h(\x,n T_F)
+\end{align}
+
+We then have:
+\begin{align}
+	h_{n+1}[\x] &= e^{-1/M} h_n[\x] + S J_{0}(|\x - \x_p[n+1]|) \text{, with }\\
+	x_p[n+1] &= \left( \frac{2}{Q+1} \right) \x_p[n] + \left( \frac{Q-1}{Q+1} \right) \x_p[n-1] - \frac{1}{Q+1} \nabla h_{n}[x].
+\end{align}
+
+
+
+
+
+
+
 
 \end{document}

@@ -2,14 +2,13 @@
 export SHELL=$(type -p bash)
 
 NPTS=200
-
 echo -e "INPUT-CLASS TEXTFP \nINPUT-SIZE 32\nRANK 2\nDIMENSION-SIZES $NPTS $NPTS" > h5.cfg
 #rm -f output/*.h5 output/*.png
 
 readarray paths < output/particle_paths.txt
 
 png () {
-
+	L=200
 	h5import $1 -c h5.cfg -o $1".h5"
 	h5topng $1".h5" -c bluered -Z -o $1".png"
 	
@@ -23,7 +22,8 @@ png () {
 	for ((i=0 ; i < $npts ; i++)); do
 	        px=${a[$(( 2*i ))]}
 	        py=${a[$(( 2*i + 1 ))]}
-	        convert $1".png" -fill black -draw "circle $(( $px + 1 )),$(( $NPTS - $py + 1 )) $(( $px - 1 )),$(( $NPTS - $py - 1 ))" $1".png"
+		echo "cc:$(( $px + 1 )), $(( $L - $py + 1 )) $(( $px - 1 )) $(( $L - $py - 1 ))"
+	        convert $1".png" -fill black -draw "circle $(( $px + 1 )),$(( $L - $py + 1 )) $(( $px )),$(( $L - $py ))" $1".png"
 	done
 
 	rm $1".h5"
