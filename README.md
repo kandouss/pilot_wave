@@ -9,8 +9,8 @@ Videos!
 
 Requirements
 ----
-command (apt-package)
-commands should be in your path, and installing the listed apt-packages should put them there.
+- command (apt-package)
+  - commands should be in your path, and installing the listed apt-packages should put them there.
 
 The following libraries are necessray to build the "pwave" program:
 - gsl (libgsl0-dev)
