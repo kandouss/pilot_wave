@@ -4,11 +4,12 @@
 #include <math.h>
 #include <gsl_sf_bessel.h>
 
-void initialize_field(Field *f_in, size_t field_x, size_t field_y, double S_in)
+void initialize_field(Field *f_in, size_t field_x, size_t field_y, double S_in, double a_in)
 {
 	f_in->x_max = field_x;
 	f_in->y_max = field_y;
 	f_in->S = S_in;
+	f_in->a = a_in;
 	f_in->field_array = (double *)calloc(field_x*field_y,sizeof(double));
 }
 
@@ -71,12 +72,14 @@ Point point_grad(Field *f_in, Point pt)
 	Point g_pp = index_grad(f_in,(Index){x_p,y_p});
 //	Weights are:
 //	nn	a*b	
-//	np	a*(1-b)
-//	pn	(1-a)*b
+//	pn	a*(1-b)
+//	np	(1-a)*b
 //	pp	(1-a)*(1-b)
 	return (Point) {
-		(g_nn.x*a*b + g_np.x*a*(1-b) + g_pn.x*(1-a)*b + g_pp.x*(1-a)*(1-b)),
-		(g_nn.y*a*b + g_np.y*a*(1-b) + g_pn.y*(1-a)*b + g_pp.y*(1-a)*(1-b)) };
+		(g_nn.x*a*b + g_pn.x*a*(1-b) + g_np.x*(1-a)*b + g_pp.x*(1-a)*(1-b)),
+		(g_nn.y*a*b + g_pn.y*a*(1-b) + g_np.y*(1-a)*b + g_pp.y*(1-a)*(1-b)) };
+//	printf("\nx diff: %1.4f/%1.4f\ny diff: %1.4f/%1.4f\n",(g_nn.x*a*b + g_pn.x*a*(1-b) + g_np.x*(1-a)*b + g_pp.x*(1-a)*(1-b)),g_pp.x,(g_nn.y*a*b + g_pn.y*a*(1-b) + g_np.y*(1-a)*b + g_pp.y*(1-a)*(1-b)),g_pp.y);
+//	return g_pp;
 }
 double bess0(double x)
 {

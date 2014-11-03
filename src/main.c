@@ -6,6 +6,7 @@
 
 void update_field(Field *f, Droplet *drops, size_t n_drops)
 {
+	double S = f->S;
 	//expM = e^(-1/M)
 	double expM = 0.95;
 	
@@ -24,7 +25,7 @@ void update_field(Field *f, Droplet *drops, size_t n_drops)
 				p_x = drops[m].p.x;
 				p_y = drops[m].p.y;
 				dist = sqrt(pow(p_x-i,2)+pow(p_y-j,2));
-				delta = delta + drops[m].Q * bess0(dist);
+				delta = delta + S * bess0(dist/(f->a));
 			}
 			sfv(f,ind,gfv(f,ind)*expM + delta);
 		}
@@ -35,8 +36,8 @@ void update_particle(Field *f_in, Droplet *drop)
 {
 	Point pg = point_grad(f_in,drop->p);
 	double Q = drop->Q;
-	Point np = { 2/(Q+1)*drop->p.x + (Q-1)/(Q+1)*drop->p_prev.x - 1/(Q+1)*(pg.x),
-		2/(Q+1)*drop->p.y + (Q-1)/(Q+1)*drop->p_prev.y - 1/(Q+1)*(pg.y) };
+	Point np = { 2/(Q+1)*drop->p.x + (Q-1)/(Q+1)*drop->p_prev.x - (f_in->a)/(Q+1)*(pg.x),
+		2/(Q+1)*drop->p.y + (Q-1)/(Q+1)*drop->p_prev.y - (f_in->a)/(Q+1)*(pg.y) };
 	drop->p_prev.x = drop->p.x;
 	drop->p_prev.y = drop->p.y;
 	drop->p.x = np.x;
@@ -45,27 +46,33 @@ void update_particle(Field *f_in, Droplet *drop)
 }
 
 int main() {
-	int max_iterations=1000;
+	int max_iterations=5;
 	double L = 200;
-	double S = 0.1;
+	double S = .2;
 	double Q = 1;
+	double a = 5;
 
 	printf("\nRunning main...\n");
 	Field test_field;
-	initialize_field(&test_field,L,L,S);
+	initialize_field(&test_field,L,L,S,a);
 
 	char *ofname = (char *)malloc(32*sizeof(char));	
 	char *pfname = (char *)malloc(32*sizeof(char));
 	
-	size_t n_drops = 2;
-	Droplet drops[2];
+	size_t n_drops = 16;
+	Droplet drops[16];
+	int dsl = 4;
+	
+	double s = 0.5*L-(dsl/2)*a;
+	for(int i=0;i<dsl;i++)
+		for(int j=0;j<dsl;j++)
+			initialize_droplet(&drops[i*dsl+j],&(Point){s+i*a,s+j*a},3);
 
-
-	initialize_droplet(&drops[0],&(Point){100,101},1.1);
-//	initialize_droplet(&drops[1],&(Point){100,100},1.2);
-	initialize_droplet(&drops[2],&(Point){99,100},1.3);
-//	initialize_droplet(&drops[3],&(Point){0.49*L,0.495*L},Q);
-//	initialize_droplet(&drops[4],&(Point){0.50*L,0.505*L},Q);
+//	initialize_droplet(&drops[0],&(Point){100,101},5);
+//	initialize_droplet(&drops[1],&(Point){97,100},3);
+//	initialize_droplet(&drops[2],&(Point){99,100},1.3);
+//	initialize_droplet(&drops[3],&(Point){0.49*L,0.495*L},1.5);
+//	initialize_droplet(&drops[4],&(Point){0.50*L,0.505*L},1.2);
 
 
 	sprintf(pfname,"output/particle_paths.txt");

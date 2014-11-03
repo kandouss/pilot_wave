@@ -23,7 +23,7 @@ png () {
 	        px=${a[$(( 2*i ))]}
 	        py=${a[$(( 2*i + 1 ))]}
 		echo "cc:$(( $px + 1 )), $(( $L - $py + 1 )) $(( $px - 1 )) $(( $L - $py - 1 ))"
-	        convert $1".png" -fill black -draw "circle $(( $px + 1 )),$(( $L - $py + 1 )) $(( $px )),$(( $L - $py ))" $1".png"
+	        convert -define png:color-type=2 $1".png" -fill black -draw "circle $(( $px + 1 )),$(( $L - $py + 1 )) $(( $px )),$(( $L - $py ))" $1".png"
 	done
 
 	rm $1".h5"
@@ -35,5 +35,5 @@ export -f png
 
 ls output/mat_????? | parallel -j2 "png {}"
 
-avconv -r 30 -i output/mat_%05d.png -b:v 1000k "videos/v"$(date +%m%d%H%M%S).mp4
+avconv -r 24 -i output/mat_%05d.png -b:v 1000k -r 24 "videos/v"$(date +%m%d%H%M%S).mp4
 rm h5.cfg output/*.png

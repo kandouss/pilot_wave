@@ -19,6 +19,7 @@ typedef struct Field
 {
 	//Non-dimensional field parameter
 	double S;
+	double a;
 	//Size of the 2D field array
 	size_t x_max;
 	size_t y_max;
@@ -36,7 +37,7 @@ typedef struct Droplet
 	Point p_prev;
 } Droplet;
 
-void initialize_field(Field *f_in, size_t field_x, size_t field_y, double S_in);
+void initialize_field(Field *f_in, size_t field_x, size_t field_y, double S_in, double a_in);
 
 void destroy_field(Field *f_in);
 
