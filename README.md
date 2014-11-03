@@ -1,6 +1,6 @@
 Simulations!
 ----
-- [Documentation](https://github.com/kandouss/pilot_wave/blob/master/latex/pw_sim_notes.pdf) is in the latex directory.
+- [Documentation](https://github.com/kandouss/pilot_wave/raw/master/latex/pw_sim_notes.pdf) is in the latex directory.
 
 Videos! 
 ----
