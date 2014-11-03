@@ -46,8 +46,8 @@ void update_particle(Field *f_in, Droplet *drop)
 }
 
 int main() {
-	int max_iterations=500;
-	double L = 200;
+	int max_iterations=200;
+	double L = 300;
 	double S = .3;
 	double a = 5;
 
@@ -66,13 +66,6 @@ int main() {
 	for(int i=0;i<dsl;i++)
 		for(int j=0;j<dsl;j++)
 			initialize_droplet(&drops[i*dsl+j],&(Point){s+i*a,s+j*a},3);
-
-//	initialize_droplet(&drops[0],&(Point){100,101},5);
-//	initialize_droplet(&drops[1],&(Point){97,100},3);
-//	initialize_droplet(&drops[2],&(Point){99,100},1.3);
-//	initialize_droplet(&drops[3],&(Point){0.49*L,0.495*L},1.5);
-//	initialize_droplet(&drops[4],&(Point){0.50*L,0.505*L},1.2);
-
 
 	sprintf(pfname,"output/particle_paths.txt");
 	FILE *path_file = fopen(pfname,"w");

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-c -std=c99 -Wall -O3 -I/usr/include/gsl -finline-functions
+CFLAGS=-c -std=c99 -Wall -O3 -I/usr/include/gsl
 LDFLAGS=-L/usr/lib64
 LDLIBS=-lm -lgsl -lgslcblas
 VPATH=src/
