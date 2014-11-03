@@ -46,9 +46,9 @@ void update_particle(Field *f_in, Droplet *drop)
 }
 
 int main() {
-	int max_iterations=5;
+	int max_iterations=500;
 	double L = 200;
-	double S = .2;
+	double S = .3;
 	double Q = 1;
 	double a = 5;
 
@@ -59,9 +59,9 @@ int main() {
 	char *ofname = (char *)malloc(32*sizeof(char));	
 	char *pfname = (char *)malloc(32*sizeof(char));
 	
-	size_t n_drops = 16;
-	Droplet drops[16];
-	int dsl = 4;
+	size_t n_drops = 100;
+	Droplet drops[100];
+	int dsl = 10;
 	
 	double s = 0.5*L-(dsl/2)*a;
 	for(int i=0;i<dsl;i++)

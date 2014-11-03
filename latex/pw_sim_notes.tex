@@ -1,5 +1,6 @@
 \documentclass{article}
 \usepackage{amsmath}
+\usepackage{hyperref}
 
 
 \newcommand{\x}{\mathbf{x}}
@@ -12,8 +13,11 @@
 
 \maketitle
 
-\section{Discretization}
+\begin{abstract}
+Notes accompanying pilot wave time-averaged bouncing droplet simulation \url{https://github.com/kandouss/pilot_wave}.
+\end{abstract}
 
+\section{Discretization}
 According to [Bush's review paper], the field created by a walking droplet is of the form:
 \begin{equation}
 	\label{eq:raw_field}
@@ -77,12 +81,40 @@ Finally, we switch to more suggestive notation for discrete numerical computatio
 
 We then have:
 \begin{align}
-	h_{n+1}[\x] &= e^{-1/M} h_n[\x] + S J_{0}(|\x - \x_p[n+1]|) \text{, with }\\
-	x_p[n+1] &= \left( \frac{2}{Q+1} \right) \x_p[n] + \left( \frac{Q-1}{Q+1} \right) \x_p[n-1] - \frac{1}{Q+1} \nabla h_{n}[x].
+	h_{n+1}[\x] &= e^{-1/M} h_n[\x] + S J_{0}(|\x - \x_p[n+1]|) \text{, with } \label{eq:field_evolution}\\
+	x_p[n+1] &= \left( \frac{2}{Q+1} \right) \x_p[n] + \left( \frac{Q-1}{Q+1} \right) \x_p[n-1] - \frac{1}{Q+1} \nabla h_{n}[x]\label{eq:drop_evolution}.
 \end{align}
 
+We assume that $T_{F}$ and $1/K_{F}$ are very small. In order that this model be consistent with the physical vibrating bath system, the length and time scale of the vertical motion (e.g. $T_{F}$ and $K_{F}$ must be much smaller than those of the horizontal translational motion. 
+[Oza, bush, ...] also make a very similar assumption in the derivation of the time-averaged integral equation of motion for a droplet.
+
+\section{Implimentation}
+The simulation described here uses Eq.~\ref{eq:drop_evolution} to evolve the spatial trajectories of any number of droplets, while using Eq.~\ref{eq:field_evolution} to describe the time-averaged shape of the wave field.\footnote{The code described here, along with source for this documentation and a program to make animations of simulations, is available at \url{https://github.com/kandouss/pilot_wave}.}
+
+\subsection{Data structures}
+The wave field at time $t+n T_{F}$ is represented by a two-dimensional array of double-precision floating-point values, $h_{n}[\x]$. The grid spacing is $1/K_{F}$.
+The state of each droplet is determined by two coordinates: its current position, and its position at the previous time-step.\\
+
+The wave field is calculated at every point in the grid at every time step. This approach was chosen (instead of, for example, computing the values of the Bessel functions only where necessary to calculate the wave field gradient at a droplet position) for ease of implementation and visualization.
+
+\subsection{Stability}
+I haven't yet tried to figure out the formal stability requirements for time step size and grid spacing.
+However, it is clear that calculation of the wave field gradient is a big source of error. In particular, the field is only defined on grid points, but the droplet positions are nominally represented by floating-point numbers. Estimating the gradient of the field at an arbitrary point by the gradient at the nearest grid point seems to introduce too much error. The gradient is instead calculated using a weighted average of the gradients at the four nearest grid points.\\
 
 
+\section{To do}
+\subsection{Simulation}
+Two-particle interactions
+\begin{itemize}
+	\item Conditions for ratcheting vs orbiting vs flying apart
+\end{itemize}
+Lattices
+\begin{itemize}
+	\item What shapes are stable \url{https://youtu.be/GF0ldk0WUL4}
+\end{itemize}
+\subsection{Theory}
+Look at effects of phase differences in vertical motion
+	
 
 
 
