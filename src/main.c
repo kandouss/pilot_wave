@@ -45,10 +45,10 @@ void update_particle(Field *f_in, Droplet *drop)
 }
 
 int main() {
-	int max_iterations=5000;
+	int max_iterations=1000;
 	double L = 200;
-	double S = 1;
-	double Q = 0.6;
+	double S = 0.1;
+	double Q = 1;
 
 	printf("\nRunning main...\n");
 	Field test_field;
@@ -57,15 +57,15 @@ int main() {
 	char *ofname = (char *)malloc(32*sizeof(char));	
 	char *pfname = (char *)malloc(32*sizeof(char));
 	
-	size_t n_drops = 5;
-	Droplet drops[5];
+	size_t n_drops = 2;
+	Droplet drops[2];
 
 
-	initialize_droplet(&drops[0],&(Point){0.51*L,0.51*L},Q);
-	initialize_droplet(&drops[1],&(Point){0.51*L,0.49*L},Q);
-	initialize_droplet(&drops[2],&(Point){0.49*L,0.52*L},Q);
-	initialize_droplet(&drops[3],&(Point){0.49*L,0.495*L},Q);
-	initialize_droplet(&drops[4],&(Point){0.50*L,0.505*L},Q);
+	initialize_droplet(&drops[0],&(Point){100,101},1.1);
+//	initialize_droplet(&drops[1],&(Point){100,100},1.2);
+	initialize_droplet(&drops[2],&(Point){99,100},1.3);
+//	initialize_droplet(&drops[3],&(Point){0.49*L,0.495*L},Q);
+//	initialize_droplet(&drops[4],&(Point){0.50*L,0.505*L},Q);
 
 
 	sprintf(pfname,"output/particle_paths.txt");

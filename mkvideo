@@ -3,7 +3,7 @@ export SHELL=$(type -p bash)
 
 NPTS=200
 echo -e "INPUT-CLASS TEXTFP \nINPUT-SIZE 32\nRANK 2\nDIMENSION-SIZES $NPTS $NPTS" > h5.cfg
-#rm -f output/*.h5 output/*.png
+rm -f output/*.h5 output/*.png
 
 readarray paths < output/particle_paths.txt
 
@@ -36,4 +36,4 @@ export -f png
 ls output/mat_????? | parallel -j2 "png {}"
 
 avconv -r 30 -i output/mat_%05d.png -b:v 1000k "videos/v"$(date +%m%d%H%M%S).mp4
-#rm h5.cfg output/*.png
+rm h5.cfg output/*.png
