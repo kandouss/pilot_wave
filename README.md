@@ -4,8 +4,9 @@ Simulations!
 
 Videos! 
 ----
-- http://youtu.be/TbclZYLuhO0
+Shapes:
 - http://youtu.be/GF0ldk0WUL4
+- http://youtu.be/JOheG5o-1aQ
 
 Requirements
 ----
