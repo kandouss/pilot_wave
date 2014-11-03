@@ -2,7 +2,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <gsl_sf_bessel.h>
+
+extern inline double gfv(Field *f_in, Index in);
+extern inline void sfv(Field *f_in, Index in, double val);
+extern inline Point index_grad(Field *f_in, Index in);
+extern inline Point pp(Point p,double d);
+extern inline Point ps(Point p1,Point p2);
 
 void initialize_field(Field *f_in, size_t field_x, size_t field_y, double S_in, double a_in)
 {
@@ -29,59 +34,22 @@ void initialize_droplet(Droplet *drop, Point *start_point, double Q_in)
 	drop->Q = Q_in;
 }
 
-// gfv stands for "get field value"
-double gfv(Field *f_in, Index in)
-{
-	if( (in.x >= f_in->x_max) || (in.y >= f_in->y_max) )
-		return -1;
-	else
-		return f_in->field_array[in.x*f_in->y_max + in.y];
-}
-
-
-//sfv stands for "set field value"
-int sfv(Field *f_in, Index in, double val)
-{
-	if( (in.x >= f_in->x_max) || (in.y >= f_in->y_max) )
-		return -1;
-	else
-		f_in->field_array[in.x*f_in->y_max + in.y] = val;
-		return 1;
-}
-
-Point index_grad(Field *f_in, Index in)
-{
-	return (Point){0.5*(gfv(f_in,(Index){in.x+1,in.y})-gfv(f_in,(Index){in.x-1,in.y})),
-	 0.5*(gfv(f_in,(Index){in.x,in.y+1})-gfv(f_in,(Index){in.x,in.y-1}))	};
-}
-
 Point point_grad(Field *f_in, Point pt)
 {
-	int x_n = (int)(pt.x+1.0);
-	int x_p = (int)(pt.x);
+	double a = pt.x - (int)pt.x;
+	double b = pt.y - (int)pt.y;
 
-	int y_n = (int)(pt.y+1.0);
-	int y_p = (int)(pt.y);
+	Point g_nn = index_grad(f_in,(Index){(int)pt.x+1,(int)pt.y+1});
+	Point g_np = index_grad(f_in,(Index){(int)pt.x+1,(int)pt.y});
+	Point g_pn = index_grad(f_in,(Index){(int)pt.x,(int)pt.y+1});
+	Point g_pp = index_grad(f_in,(Index){(int)pt.x,(int)pt.y});
 
-	double a = pt.x - x_p;
-	double b = pt.y - y_p;
+	return ps( pp(g_nn,a*b),
+		 ps( pp(g_pn,a*(1-b)),
+		   ps( pp(g_np,(1-a)*b), 
+			pp(g_pp,(1-a)*(1-b)) ) ) );
 
-	Point g_nn = index_grad(f_in,(Index){x_n,y_n});
-	Point g_np = index_grad(f_in,(Index){x_n,y_p});
-	Point g_pn = index_grad(f_in,(Index){x_p,y_n});
-	Point g_pp = index_grad(f_in,(Index){x_p,y_p});
-//	Weights are:
-//	nn	a*b	
-//	pn	a*(1-b)
-//	np	(1-a)*b
-//	pp	(1-a)*(1-b)
-	return (Point) {
-		(g_nn.x*a*b + g_pn.x*a*(1-b) + g_np.x*(1-a)*b + g_pp.x*(1-a)*(1-b)),
-		(g_nn.y*a*b + g_pn.y*a*(1-b) + g_np.y*(1-a)*b + g_pp.y*(1-a)*(1-b)) };
-//	printf("\nx diff: %1.4f/%1.4f\ny diff: %1.4f/%1.4f\n",(g_nn.x*a*b + g_pn.x*a*(1-b) + g_np.x*(1-a)*b + g_pp.x*(1-a)*(1-b)),g_pp.x,(g_nn.y*a*b + g_pn.y*a*(1-b) + g_np.y*(1-a)*b + g_pp.y*(1-a)*(1-b)),g_pp.y);
-//	return g_pp;
-}
-double bess0(double x)
-{
-		return gsl_sf_bessel_J0(x);
+//	return (Point) {
+//		(g_nn.x*a*b + g_pn.x*a*(1-b) + g_np.x*(1-a)*b + g_pp.x*(1-a)*(1-b)),
+//		(g_nn.y*a*b + g_pn.y*a*(1-b) + g_np.y*(1-a)*b + g_pp.y*(1-a)*(1-b)) };
 }

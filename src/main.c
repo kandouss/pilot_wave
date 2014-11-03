@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <gsl_sf_bessel.h>
 #include "pwave_math.h"
 #include "pwave_io.h"
 
@@ -8,7 +9,7 @@ void update_field(Field *f, Droplet *drops, size_t n_drops)
 {
 	double S = f->S;
 	//expM = e^(-1/M)
-	double expM = 0.95;
+	double expM = 0.90;
 	
 	//variables for the loop
 	double p_x,p_y;
@@ -25,7 +26,7 @@ void update_field(Field *f, Droplet *drops, size_t n_drops)
 				p_x = drops[m].p.x;
 				p_y = drops[m].p.y;
 				dist = sqrt(pow(p_x-i,2)+pow(p_y-j,2));
-				delta = delta + S * bess0(dist/(f->a));
+				delta = delta + S * gsl_sf_bessel_J0(dist/(f->a));
 			}
 			sfv(f,ind,gfv(f,ind)*expM + delta);
 		}
@@ -41,15 +42,13 @@ void update_particle(Field *f_in, Droplet *drop)
 	drop->p_prev.x = drop->p.x;
 	drop->p_prev.y = drop->p.y;
 	drop->p.x = np.x;
-	drop->p.y = np.y;
-	
+	drop->p.y = np.y;	
 }
 
 int main() {
 	int max_iterations=500;
 	double L = 200;
 	double S = .3;
-	double Q = 1;
 	double a = 5;
 
 	printf("\nRunning main...\n");
@@ -59,9 +58,9 @@ int main() {
 	char *ofname = (char *)malloc(32*sizeof(char));	
 	char *pfname = (char *)malloc(32*sizeof(char));
 	
-	size_t n_drops = 100;
-	Droplet drops[100];
-	int dsl = 10;
+	size_t n_drops = 36;
+	Droplet drops[36];
+	int dsl = 6;
 	
 	double s = 0.5*L-(dsl/2)*a;
 	for(int i=0;i<dsl;i++)

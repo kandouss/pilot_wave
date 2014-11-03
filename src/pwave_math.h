@@ -43,12 +43,16 @@ void destroy_field(Field *f_in);
 
 void initialize_droplet(Droplet *drop, Point *start_point, double Q_in);
 
-double gfv(Field *f_in, Index in);
+inline double gfv(Field *f_in, Index in) { return f_in->field_array[in.x*f_in->y_max + in.y]; }
 
-int sfv(Field *f_in, Index in, double val);
+inline void sfv(Field *f_in, Index in, double val) {f_in->field_array[in.x*f_in->y_max + in.y] = val;}
 
-Point index_grad(Field *f_in, Index in);
+inline Point ps(Point p1, Point p2){return (Point){p1.x+p2.x,p1.y+p2.y};}
+
+inline Point pp(Point p, double d){return (Point){p.x*d,p.y*d};}
+
+inline Point index_grad(Field *f_in, Index in) {  return (Point){
+	0.5*(gfv(f_in,(Index){in.x+1,in.y})-gfv(f_in,(Index){in.x-1,in.y})),
+        0.5*(gfv(f_in,(Index){in.x,in.y+1})-gfv(f_in,(Index){in.x,in.y-1})) }; }
 
 Point point_grad(Field *f_in, Point pt);
-
-double bess0(double x);
