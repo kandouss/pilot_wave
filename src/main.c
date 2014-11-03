@@ -54,12 +54,12 @@ int main() {
 	Field test_field;
 	initialize_field(&test_field,L,L,S);
 
+	char *ifname = (char *)malloc(32*sizeof(char));
 	char *ofname = (char *)malloc(32*sizeof(char));	
 	char *pfname = (char *)malloc(32*sizeof(char));
 	
 	size_t n_drops = 5;
 	Droplet drops[5];
-
 
 	initialize_droplet(&drops[0],&(Point){0.51*L,0.51*L},Q);
 	initialize_droplet(&drops[1],&(Point){0.51*L,0.49*L},Q);
@@ -94,8 +94,13 @@ int main() {
 		fclose(ofile);
 	}
 	fclose(path_file);
+
+	fclose(input_file);
+
 	free(pfname);
 	free(ofname);
+	free(ifname);
+
 	destroy_field(&test_field);
 	return 0;
 }

@@ -3,7 +3,12 @@
 #include "pwave_math.h"
 
 
+void read_config(FILE *conf_file)
+{
+	
 
+
+}
 
 void print_field(Field *f_in, FILE *fp) 
 {
