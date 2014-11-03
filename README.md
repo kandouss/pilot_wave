@@ -13,10 +13,10 @@ Requirements
 - command (apt-package)
   - commands should be in your path, and installing the listed apt-packages should put them there.
 
-The following libraries are necessray to build the "pwave" program:
+In order to compile the "pwave" program, you need the following:
 - gsl (libgsl0-dev)
 
-In order to run the "mkvideo" program, make sure binaries for the following are in your PATH:
+In order to run the "mkvideo" program, you need the following:
 - h5import (hdf5-tools)
 - h5topng (h5utils)
 - avconv (libav-tools)
