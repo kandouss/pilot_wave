@@ -49,7 +49,7 @@ int main() {
 	int max_iterations=200;
 	double L = 300;
 	double S = .3;
-	double a = 5;
+	double a = 10;
 
 	printf("\nRunning main...\n");
 	Field test_field;

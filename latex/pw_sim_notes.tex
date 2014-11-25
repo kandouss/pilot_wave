@@ -100,6 +100,27 @@ The wave field is calculated at every point in the grid at every time step. This
 \subsection{Stability}
 I haven't yet tried to figure out the formal stability requirements for time step size and grid spacing.
 However, it is clear that calculation of the wave field gradient is a big source of error. In particular, the field is only defined on grid points, but the droplet positions are nominally represented by floating-point numbers. Estimating the gradient of the field at an arbitrary point by the gradient at the nearest grid point seems to introduce too much error. The gradient is instead calculated using a weighted average of the gradients at the four nearest grid points.\\
+ 
+
+\section{Forcing}
+
+\subsection{Central spring potential}
+Suppose the motion of a droplet is influenced by a central spring potential, 
+\begin{equation}
+    \label{eq:spring_potential}
+    U = m \omega^2 \left| \x - \x_0 \right|^2.
+\end{equation}
+
+The equation governing the motion of the droplet (Eq.~\ref{eq:raw_droplet}) becomes:
+\begin{equation}
+    \label{eq:raw_droplet_spring}
+	m \ddot{\x_p} + D \dot{\x_p} = - m g \nabla h(\x_p,t) - 2 m \omega^2 \left| \x - \x_0 \right|.
+\end{equation}
+
+The discrete evolution of the drop position is:
+\begin{equation}
+	x_p[n+1] = \left( \frac{2}{Q+1} \right) \x_p[n] + \left( \frac{Q-1}{Q+1} \right) \x_p[n-1] - \frac{1}{Q+1} \nabla h_{n}[x]\label{eq:drop_evolution_spring}.
+\end{equation}
 
 
 \section{To do}
@@ -114,6 +135,7 @@ Lattices
 \end{itemize}
 \subsection{Theory}
 Look at effects of phase differences in vertical motion
+\subsection{Periodic boundary conditions}
 	
 
 
