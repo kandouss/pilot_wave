@@ -34,11 +34,15 @@ void update_field(Field *f, Droplet *drops, size_t n_drops)
 }
 
 void update_particle(Field *f_in, Droplet *drop)
-{
+{ 
+  // Too lazy to add the spring potential in a clean way, omega (defined here) gives the (non-dimensionalized) spring potential frequency.
+  double Omega = 0.05;
+  // Same for center point.
+  Point p_center = {50,50};
 	Point pg = point_grad(f_in,drop->p);
 	double Q = drop->Q;
-	Point np = { 2/(Q+1)*drop->p.x + (Q-1)/(Q+1)*drop->p_prev.x - (f_in->a)/(Q+1)*(pg.x),
-		2/(Q+1)*drop->p.y + (Q-1)/(Q+1)*drop->p_prev.y - (f_in->a)/(Q+1)*(pg.y) };
+	Point np = { 2/(Q+1)*drop->p.x - Omega*Omega/(Q+1)*(drop->p.x - p_center.x)+ (Q-1)/(Q+1)*drop->p_prev.x - (f_in->a)/(Q+1)*(pg.x),
+		2/(Q+1)*drop->p.y - Omega*Omega/(Q+1)*(drop->p.y - p_center.y) + (Q-1)/(Q+1)*drop->p_prev.y - (f_in->a)/(Q+1)*(pg.y) };
 	drop->p_prev.x = drop->p.x;
 	drop->p_prev.y = drop->p.y;
 	drop->p.x = np.x;
@@ -46,10 +50,10 @@ void update_particle(Field *f_in, Droplet *drop)
 }
 
 int main() {
-	int max_iterations=200;
-	double L = 300;
+	int max_iterations=1000;
+	double L = 100;
 	double S = .3;
-	double a = 10;
+	double a = 2;
 
 	printf("\nRunning main...\n");
 	Field test_field;
@@ -57,18 +61,21 @@ int main() {
 
 	char *ofname = (char *)malloc(32*sizeof(char));	
 	char *pfname = (char *)malloc(32*sizeof(char));
+	char *fpfname = (char *)malloc(32*sizeof(char));
 	
-	size_t n_drops = 36;
-	Droplet drops[36];
+	size_t n_drops = 1;
+	Droplet drops[1];
 	int dsl = 6;
 	
-	double s = 0.5*L-(dsl/2)*a;
+	double s = 0.1*L-0*(dsl/2)*a;
 	for(int i=0;i<dsl;i++)
 		for(int j=0;j<dsl;j++)
 			initialize_droplet(&drops[i*dsl+j],&(Point){s+i*a,s+j*a},3);
 
 	sprintf(pfname,"output/particle_paths.txt");
+	sprintf(fpfname,"output/fparticle_paths.txt");
 	FILE *path_file = fopen(pfname,"w");
+  FILE *fpath_file = fopen(fpfname,"w");
 
 	for(int i=0;i<max_iterations;i++)
 	{
@@ -82,19 +89,22 @@ int main() {
 			update_particle(&test_field,&drops[m]);
 			printf("%4d,%4d ",(int)round(drops[m].p.x),(int)round(drops[m].p.y));
 			fprintf(path_file," %d,%d",(int)round(drops[m].p.x),(int)round(drops[m].p.y));
+			fprintf(fpath_file," %f,%f",drops[m].p.x,drops[m].p.y);
 		}
 		printf("\n");
 		fprintf(path_file,"\n");
+		fprintf(fpath_file,"\n");
 	
 		// Update the field based on the new particle positions.
 		update_field(&test_field, &drops[0],n_drops);
-
 		print_field(&test_field,ofile);
 		fclose(ofile);
 	}
+
 	fclose(path_file);
+  fclose(fpath_file);
 	free(pfname);
+  free(fpfname);
 	free(ofname);
 	destroy_field(&test_field);
-	return 0;
 }

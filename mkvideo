@@ -1,14 +1,14 @@
 #!/bin/bash
 export SHELL=$(type -p bash)
 
-NPTS=300
+NPTS=100
 echo -e "INPUT-CLASS TEXTFP \nINPUT-SIZE 32\nRANK 2\nDIMENSION-SIZES $NPTS $NPTS" > h5.cfg
 rm -f output/*.h5 output/*.png
 
-readarray paths < output/particle_paths.txt
+readarray paths < output/fparticle_paths.txt
 
 png () {
-	L=300
+	L=100
 	h5import $1 -c h5.cfg -o $1".h5"
 	h5topng $1".h5" -c bluered -Z -o $1".png"
 	
@@ -32,5 +32,5 @@ export -f png
 
 ls output/mat_????? | parallel -j2 "echo {#}; png {}"
 
-avconv -i output/mat_%05d.png -s 300:300 "videos/v"$(date +%m%d%H%M%S).mp4
+avconv -i output/mat_%05d.png -s 100:100 "videos/v"$(date +%m%d%H%M%S).mp4
 rm h5.cfg output/*.png
